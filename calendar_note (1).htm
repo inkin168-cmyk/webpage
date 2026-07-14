@@ -1,0 +1,949 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="UTF-8"><meta http-equiv="content-type" content="text/html; charset=UTF-8"><meta name="renderer" content="webkit"><meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"><meta name="x-ua-compatible" content="IE=edge">
+<meta property="og:title" content="休假記錄輪班萬年曆" />
+<meta property="og:description" content="休假記錄輪班月曆，紀錄每月公休和特休並自動計算每月出勤天數" />
+<meta property="og:image" content="https://kin888.000webhostapp.com/favicon.png" />
+
+<title>休假記錄2.1</title>
+<!--script src="http://code.jquery.com/jquery-3.2.1.min.js" ></script-->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/all.css" />
+<!-- Air datepicker Css -->
+        <link href="https://cdn.jsdelivr.net/npm/air-datepicker@3.3.5/air-datepicker.min.css" rel="stylesheet">
+<script src="https://code.jquery.com/jquery-3.6.0.slim.min.js"></script>
+ <script src = "https://cdn.jsdelivr.net/gh/inkin168-cmyk/webpage@refs/heads/main/adjustDate.js"></script><!--這是adjustDate.js -->
+<script src = "https://cdn.jsdelivr.net/gh/inkin168-cmyk/webpage@refs/heads/main/tkobj.js"></script><!--這是tkobj.js -->
+<style type="text/css">
+#view{ margin-left:-5px;
+width:100%; background:#ead40b;
+border: 5px solid  #ff47d1
+}
+@import url("https://fonts.googleapis.com/earlyaccess/cwtexyen.css");
+body {font-family:cwTeXYen}
+#calendar{  width: 100%;height:480px;   
+color:#000;
+font-family:cwTeXYen,Arial;
+font-weight:bold;
+}
+
+#bg_img{width:98%; height:1420px;
+position:absolute;    top:120px;    left:10px;
+z-index:2;
+}
+
+
+
+
+#gotoday {
+    display: inline-block;
+    text-align: center;
+    vertical-align: middle;
+    padding: 4px 4px;
+    border: 1px solid #0ea9b3;
+    border-radius: 8px;
+    background: #17ffff; 
+    text-shadow: #0a7980 1px 1px 1px;
+    font: normal normal bold 20px arial;
+    color: #000000;
+    text-decoration: none;
+}
+
+#gotoday:active {
+    background: #0ea9b3;
+    color: #ff0000;
+}
+
+
+#prev, #next {
+    display: inline-block;
+    text-align: center;
+    vertical-align: middle;
+    font: normal normal bold 28px arial;
+    color:#fc03cf;
+    text-decoration: none;
+}
+
+#prev:active , #next:active {
+      color: #00cc00;
+  }
+#prev{
+	margin-left:30px;
+    float: left;
+}
+#next{
+    margin-right:30px;
+    float: right;
+}
+
+#tittle{
+color:#00F;
+font-family:Arial;
+font-size:28pt;
+font-weight:bold;
+text-align:center;
+}
+
+
+#days th {
+font-size:20pt;
+text-align:center;
+}
+
+
+#calendar td{
+font-size:20pt;
+text-align:center;
+
+}
+
+.lunar{font-size:10pt; font-family:cwTeXYen, Arial;}
+
+#hand{
+font-size:18pt;
+text-align:center;
+}
+
+#todayColor {
+background:#00ffff;
+}
+
+
+#works, #Myrestday{ color:#00f;
+font-family:Arial;
+font-size:18pt;
+font-weight:bold;
+position:relative; top:10px
+}
+input, textarea{ font-size :14pt; }
+button { font-size :20pt; margin:20px 10px}
+
+ #myDatepicker{display: none; position: absolute;
+top: 30%; left: calc(50% - 300px / 2);
+width: 300px; 
+}
+ 
+.borderA{border:3px solid red;border-radius: 50%;}
+.borderB{border:3px solid #f80;border-radius: 50%;}
+note {border:3px solid red;border-radius: 50%;  }
+
+ .dialog {
+  text-align: center;
+  background: #1abc9c;
+  color: blue;
+}
+.dialog input, button, select{font-size: 24px;}
+</style>
+
+
+<script type="text/javascript">
+//var newScript= document.createElement("script");
+//newScript.src = "adjustDate.js?"+new Date().getTime();
+//document.getElementsByTagName('head')[0].appendChild(newScript);
+
+//var newScript = document.createElement("script");
+//newScript.src = "tkobj.js?"+new Date().getTime();
+//document.getElementsByTagName('head')[0].appendChild(newScript);
+
+
+/*****************************************************************************
+                                 日期數據
+*****************************************************************************/
+
+var lunarInfo=new Array(
+0x4bd8,0x4ae0,0xa570,0x54d5,0xd260,0xd950,0x5554,0x56af,0x9ad0,0x55d2,
+0x4ae0,0xa5b6,0xa4d0,0xd250,0xd295,0xb54f,0xd6a0,0xada2,0x95b0,0x4977,
+0x497f,0xa4b0,0xb4b5,0x6a50,0x6d40,0xab54,0x2b6f,0x9570,0x52f2,0x4970,
+0x6566,0xd4a0,0xea50,0x6a95,0x5adf,0x2b60,0x86e3,0x92ef,0xc8d7,0xc95f,
+0xd4a0,0xd8a6,0xb55f,0x56a0,0xa5b4,0x25df,0x92d0,0xd2b2,0xa950,0xb557,
+0x6ca0,0xb550,0x5355,0x4daf,0xa5b0,0x4573,0x52bf,0xa9a8,0xe950,0x6aa0,
+0xaea6,0xab50,0x4b60,0xaae4,0xa570,0x5260,0xf263,0xd950,0x5b57,0x56a0,
+0x96d0,0x4dd5,0x4ad0,0xa4d0,0xd4d4,0xd250,0xd558,0xb540,0xb6a0,0x95a6,
+0x95bf,0x49b0,0xa974,0xa4b0,0xb27a,0x6a50,0x6d40,0xaf46,0xab60,0x9570,
+0x4af5,0x4970,0x64b0,0x74a3,0xea50,0x6b58,0x5ac0,0xab60,0x96d5,0x92e0,
+0xc960,0xd954,0xd4a0,0xda50,0x7552,0x56a0,0xabb7,0x25d0,0x92d0,0xcab5,
+0xa950,0xb4a0,0xbaa4,0xad50,0x55d9,0x4ba0,0xa5b0,0x5176,0x52bf,0xa930,
+0x7954,0x6aa0,0xad50,0x5b52,0x4b60,0xa6e6,0xa4e0,0xd260,0xea65,0xd530,
+0x5aa0,0x76a3,0x96d0,0x4afb,0x4ad0,0xa4d0,0xd0b6,0xd25f,0xd520,0xdd45,
+0xb5a0,0x56d0,0x55b2,0x49b0,0xa577,0xa4b0,0xaa50,0xb255,0x6d2f,0xada0,
+0x4b63,0x937f,0x49f8,0x4970,0x64b0,0x68a6,0xea5f,0x6b20,0xa6c4,0xaaef,
+0x92e0,0xd2e3,0xc960,0xd557,0xd4a0,0xda50,0x5d55,0x56a0,0xa6d0,0x55d4,
+0x52d0,0xa9b8,0xa950,0xb4a0,0xb6a6,0xad50,0x55a0,0xaba4,0xa5b0,0x52b0,
+0xb273,0x6930,0x7337,0x6aa0,0xad50,0x4b55,0x4b6f,0xa570,0x54e4,0xd260,
+0xe968,0xd520,0xdaa0,0x6aa6,0x56df,0x4ae0,0xa9d4,0xa4d0,0xd150,0xf252,
+0xd520);
+
+var solarMonth=new Array(31,28,31,30,31,30,31,31,30,31,30,31);
+var Gan=new Array("甲","乙","丙","丁","戊","己","庚","辛","壬","癸");
+var Zhi=new Array("子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥");
+var Animals=new Array("鼠","牛","虎","兔","龍","蛇","馬","羊","猴","雞","狗","豬");
+var solarTerm = new Array("小寒","大寒","立春","雨水","驚蟄","春分","清明","穀雨","立夏","小滿","芒種","夏至","小暑","大暑","立秋","處暑","白露","秋分","寒露","霜降","立冬","小雪","大雪","冬至");
+var sTermInfo = new Array(0,21208,42467,63836,85337,107014,128867,150921,173149,195551,218072,240693,263343,285989,308563,331033,353350,375494,397447,419210,440795,462224,483532,504758);
+var nStr1 = new Array('日','一','二','三','四','五','六','七','八','九','十');
+var nStr2 = new Array('初','十','廿','卅','卌');
+var monthName = new Array("一月","二月","三月","四月","五月","六月","七月","八月","九月","十月","十一月","十二月");
+
+//國曆節日 *表示放假日
+var sFtv = new Array(
+"0101*元旦",
+"0214 情人節",
+"0228*和平日",
+"0329 青年節",
+"0404*兒童節",
+"0501*勞動節",
+"0808 父親節",
+"0928*教師節",
+"1010*國慶日",
+"1025*光復節",
+"1225*聖誕節");
+
+//農曆節日 *表示放假日
+var lFtv = new Array(
+"01-1*小年夜",
+"0100*除夕",
+"0101*春節",
+"0102*回娘家",
+"0103*初三",
+"0115 元宵節",
+"0505*端午節",
+"0707 七夕",
+"0815*中秋節",
+"0909 重陽節");
+
+//某月的第幾個星期幾
+var wFtv = new Array(
+"0520 母親節");
+
+
+/*****************************************************************************
+                                    日期計算
+*****************************************************************************/
+
+//====================================== 傳回農曆 y年的總天數
+function lYearDays(y) {
+   var i, sum = 348;
+   for(i=0x8000; i>0x8; i>>=1) sum += (lunarInfo[y-1900] & i)? 1: 0;
+   return(sum+leapDays(y));
+}
+
+//====================================== 傳回農曆 y年閏月的天數
+function leapDays(y) {
+   if(leapMonth(y)) return( (lunarInfo[y-1899]&0xf)==0xf? 30: 29);
+   else return(0);
+}
+
+//====================================== 傳回農曆 y年閏哪個月 1-12 , 沒閏傳回 0
+function leapMonth(y) {
+   var lm = lunarInfo[y-1900] & 0xf;
+   return(lm==0xf?0:lm);
+}
+
+//====================================== 傳回農曆 y年m月的總天數
+function monthDays(y,m) {
+   return( (lunarInfo[y-1900] & (0x10000>>m))? 30: 29 );
+}
+
+
+//====================================== 算出農曆, 傳入日期物件, 傳回農曆日期物件
+//                                       該物件屬性有 .year .month .day .isLeap
+function Lunar(objDate) {
+
+   var i, leap=0, temp=0;
+   var offset   = (Date.UTC(objDate.getFullYear(),objDate.getMonth(),objDate.getDate()) - Date.UTC(1900,0,31))/86400000;
+
+   for(i=1900; i<2100 && offset>0; i++) { temp=lYearDays(i); offset-=temp; }
+
+   if(offset<0) { offset+=temp; i--; }
+
+   this.year = i;
+
+   leap = leapMonth(i); //閏哪個月
+   this.isLeap = false;
+
+   for(i=1; i<13 && offset>0; i++) {
+      //閏月
+      if(leap>0 && i==(leap+1) && this.isLeap==false)
+         { --i; this.isLeap = true; temp = leapDays(this.year); }
+      else
+         { temp = monthDays(this.year, i); }
+
+      //解除閏月
+      if(this.isLeap==true && i==(leap+1)) this.isLeap = false;
+
+      offset -= temp;
+   }
+
+   if(offset==0 && leap>0 && i==leap+1)
+      if(this.isLeap)
+         { this.isLeap = false; }
+      else
+         { this.isLeap = true; --i; }
+
+   if(offset<0){ offset += temp; --i; }
+
+   this.month = i;
+   this.day = offset + 1;
+}
+
+//==============================傳回國歷 y年某m+1月的天數
+function solarDays(y,m) {
+   if(m==1)
+      return(((y%4 == 0) && (y%100 != 0) || (y%400 == 0))? 29: 28);
+   else
+      return(solarMonth[m]);
+}
+//============================== 傳入 offset 傳回干支, 0=甲子
+function cyclical(num) {
+   return(Gan[num%10]+Zhi[num%12]);
+}
+
+//============================== 月曆屬性
+function calElement(sYear,sMonth,sDay,week,lYear,lMonth,lDay,isLeap,cYear,cMonth,cDay) {
+   this.isToday    = false;
+   //國歷
+   this.sYear      = sYear;   //西元年4位數字
+   this.sMonth     = sMonth;  //西元月數字
+   this.sDay       = sDay;    //西元日數字
+   this.week       = week;    //星期, 1個中文
+   //農曆
+   this.lYear      = lYear;   //西元年4位數字
+   this.lMonth     = lMonth;  //農曆月數字
+   this.lDay       = lDay;    //農曆日數字
+   this.isLeap     = isLeap;  //是否為農曆閏月?
+   //八字
+   this.cYear      = cYear;   //年柱, 2個中文
+   this.cMonth     = cMonth;  //月柱, 2個中文
+   this.cDay       = cDay;    //日柱, 2個中文
+
+   this.color      = '';
+
+   this.lunarFestival = ''; //農曆節日
+   this.solarFestival = ''; //國歷節日
+   this.solarTerms    = ''; //節氣
+}
+
+//===== 某年的第n個節氣為幾日(從0小寒起算)
+function sTerm(y,n) {
+   var offDate = new Date( ( 31556925974.7*(y-1900) + sTermInfo[n]*60000  ) + Date.UTC(1900,0,6,2,5) );
+   return(offDate.getUTCDate());
+}
+
+
+
+
+//============================== 傳回月曆物件 (y年,m+1月)
+/*
+功能說明: 傳回整個月的日期資料物件
+
+使用方式: OBJ = new calendar(年,零起算月);
+
+OBJ.length      傳回當月最大日
+OBJ.firstWeek   傳回當月一日星期
+
+由 OBJ[日期].屬性名稱 即可取得各項值
+
+OBJ[日期].isToday  傳回是否為今日 true 或 false
+
+其他 OBJ[日期] 屬性參見 calElement() 中的註解
+*/
+function Xcalendar(y,m) {
+
+   var sDObj, lDObj, lY, lM, lD=1, lL, lX=0, tmp1, tmp2, tmp3;
+   var cY, cM, cD; //年柱,月柱,日柱
+   var lDPOS = new Array(3);
+   var n = 0;
+   var firstLM = 0;
+
+   sDObj = new Date(y,m,1,0,0,0,0);    //當月一日日期
+
+   this.length    = solarDays(y,m);    //國歷當月天數
+   this.firstWeek = sDObj.getDay();    //國歷當月1日星期幾
+
+   ////////年柱 1900年立春後為庚子年(60進制36)
+   if(m<2) cY=cyclical(y-1900+36-1);
+   else cY=cyclical(y-1900+36);
+   var term2=sTerm(y,2); //立春日期
+
+   ////////月柱 1900年1月小寒以前為 丙子月(60進制12)
+   var firstNode = sTerm(y,m*2) //傳回當月「節」為幾日開始
+   cM = cyclical((y-1900)*12+m+12);
+
+   //當月一日與 1900/1/1 相差天數
+   //1900/1/1與 1970/1/1 相差25567日, 1900/1/1 日柱為甲戌日(60進制10)
+   var dayCyclical = Date.UTC(y,m,1,0,0,0,0)/86400000+25567+10;
+
+   for(var i=0;i<this.length;i++) {
+
+      if(lD>lX) {
+         sDObj = new Date(y,m,i+1);    //當月一日日期
+         lDObj = new Lunar(sDObj);     //農曆
+         lY    = lDObj.year;           //農曆年
+         lM    = lDObj.month;          //農曆月
+         lD    = lDObj.day;            //農曆日
+         lL    = lDObj.isLeap;         //農曆是否閏月
+         lX    = lL? leapDays(lY): monthDays(lY,lM); //農曆當月最後一天
+
+         if(n==0) firstLM = lM;
+         lDPOS[n++] = i-lD+1;
+      }
+
+      //依節氣調整二月分的年柱, 以立春為界
+      if(m==1 && (i+1)==term2) cY=cyclical(y-1900+36);
+      //依節氣月柱, 以「節」為界
+      if((i+1)==firstNode) cM = cyclical((y-1900)*12+m+13);
+      //日柱
+      cD = cyclical(dayCyclical+i);
+
+      //sYear,sMonth,sDay,week,
+      //lYear,lMonth,lDay,isLeap,
+      //cYear,cMonth,cDay
+      this[i] = new calElement(y, m+1, i+1, nStr1[(i+this.firstWeek)%7],
+                               lY, lM, lD++, lL,
+                               cY ,cM, cD );
+      if(  (i+this.firstWeek)%7==0  || (i+this.firstWeek)%7==6  )   this[i].color = 'red';  //週日顏色	
+   }
+
+   //節氣
+   tmp1=sTerm(y,m*2  )-1;
+   tmp2=sTerm(y,m*2+1)-1;
+   this[tmp1].solarTerms = solarTerm[m*2];
+   this[tmp2].solarTerms = solarTerm[m*2+1];
+   if(m==3) this[tmp1].color = 'red'; //清明顏色
+
+   //國歷節日
+   for(i in sFtv)
+      if(sFtv[i].match(/^(\d{2})(\d{2})([\s\*])(.+)$/))
+         if(Number(RegExp.$1)==(m+1)) {
+            if(Number(RegExp.$2)<=this.length){
+                s= RegExp.$4 ;
+              if(RegExp.$3=='*') {this[Number(RegExp.$2)-1].color = 'red'; this[Number(RegExp.$2)-1].solarFestival=s.fontcolor('red');}
+               else   this[Number(RegExp.$2)-1].solarFestival=s.fontcolor('blue');
+            }
+         }
+
+   //月周節日
+   for(i in wFtv)
+      if(wFtv[i].match(/^(\d{2})(\d)(\d)([\s\*])(.+)$/))
+         if(Number(RegExp.$1)==(m+1)) {
+            tmp1=Number(RegExp.$2);
+            tmp2=Number(RegExp.$3);
+            if(tmp1<5)
+               this[((this.firstWeek>tmp2)?7:0) + 7*(tmp1-1) + tmp2 - this.firstWeek].solarFestival += RegExp.$5.fontcolor("blue") ;
+            else {
+               tmp1 -= 5;
+               tmp3 = (this.firstWeek+this.length-1)%7; //當月最後一天星期?
+               this[this.length - tmp3 - 7*tmp1 + tmp2 - (tmp2>tmp3?7:0) - 1 ].solarFestival += RegExp.$5.fontcolor("blue") ;
+            }
+         }
+
+   //農曆節日
+   for(i in lFtv)
+      if(lFtv[i].match(/^(\d{2})(.{2})([\s\*])(.+)$/)) {
+         tmp1=Number(RegExp.$1)-firstLM;
+         if(tmp1==-11) tmp1=1;
+         if(tmp1 >=0 && tmp1<n) {
+            tmp2 = lDPOS[tmp1] + Number(RegExp.$2) -1;
+            if( tmp2 >= 0 && tmp2<this.length && this[tmp2].isLeap!=true) {
+               s= RegExp.$4;
+               if(RegExp.$3=='*') { this[tmp2].color = 'red';  this[tmp2].lunarFestival =s.fontcolor('red');}
+               else  this[tmp2].lunarFestival =s.fontcolor('blue');
+            }
+         }
+      }
+
+//彈性假日
+for(i in xFtv)
+if(xFtv[i].match(/^(\d{4})(.{2})(.{2})([\s\*])(.*)$/)) {
+    tmp1=Number(RegExp.$1);
+    tmp2=Number(RegExp.$2);
+    tmp3=Number(RegExp.$3);
+    if ( ( tmp1== y ) && ( tmp2== (m+1) ) ){
+       if(RegExp.$4=='*') 
+                { this[tmp3-1].color= 'red';
+                   //s=(RegExp.$5);
+                   this[tmp3-1].solarFestival=RegExp.$5.fontcolor('red'); 
+                }
+              else
+               { this[tmp3-1].color= 'green';
+                 //s=(RegExp.$5);
+                 this[tmp3-1].solarFestival=RegExp.$5.fontcolor('green');  
+               }
+     }
+ 
+  }
+
+   
+   //今日
+  if(y==tY && m==tM) this[tD-1].isToday = true;
+}
+
+//====================== 中文日期
+function cDay(d){
+   var s;
+
+   switch (d) {
+      case 10:
+         s = '初十'; break;
+      case 20:
+         s = '二十'; break;
+         break;
+      case 30:
+         s = '三十'; break;
+         break;
+      default :
+         s = nStr2[Math.floor(d/10)];
+         s += nStr1[d%10];
+   }
+   return(s);
+}
+
+//====================== 計算可休日數
+
+function countRestDay(Y,M){
+  var RestTday=0; 
+  
+theM = new Xcalendar(Y,M); 
+   for(var sd=0; sd<20; sd++)
+    if(theM[sd].color=="red") RestTday++;
+     
+    
+date=new Date(Y,M-1,1)
+   sY = date.getFullYear(); 
+   sM= date.getMonth(); 
+   
+preM = new Xcalendar(sY,sM); 
+   for(var sd=20; sd<preM.length; sd++)
+     if(preM[sd].color=="red") RestTday++;
+     
+  return RestTday;
+}
+
+function countFunyDay(Y,M){
+	var FunyDay=0;
+	for ( var t in noteList)
+	{ dx=t.match(/(\d{4})(\d{2})(\d{2})/); 
+	dt=RegExp.$1+"-"+RegExp.$2+"-"+RegExp.$3
+	if( new Date(Y,M-1,21)  <=  new Date(dt)  &&    new Date(dt) <= new Date(Y,M,21)  )
+	  if(noteList[t].borderN=="1")
+		FunyDay++;
+	}     
+return FunyDay;
+	
+}
+
+function showRestData()
+	{  
+	document.getElementById('works').innerText="本月工作天數："  + (workday - totalrest - restAdd); 
+	document.getElementById('Myrestday').innerText="本月可休天數："  +countRestDay(SY,SM)+"-"+countFunyDay(SY,SM) 
+	}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////  Main object
+var cld;
+var Today = new Date();
+var tY = Today.getFullYear();
+var tM = Today.getMonth();
+var tD = Today.getDate();
+
+borderclass=["","borderA","borderB"]
+
+//判斷localStorage記錄是否存在
+//if(localStorage.getItem('noteList') != null && localStorage.getItem('noteList') != undefined)
+if(localStorage["noteList"] != null && localStorage["noteList"] != undefined)
+  noteList= JSON.parse(localStorage["noteList"]) 
+else 
+  noteList ={}  
+
+var calendar = {
+dayTable:null, //初始化TABLE
+year:null, //初始化年
+month:null, //初始化月份
+ 
+
+getWeekNumber:function(targetDay){ 
+ //var targetDay = new Date(y, m, d);
+    var year = targetDay.getFullYear();
+    var month = targetDay.getMonth();
+    var days = targetDay.getDate();
+    //那一天是那一年中的第多少天
+    for (var i = 0; i < month; i++) 
+        days += calendar.getMonthDays(year, i);
+     
+    //那一年第一天是星期幾
+    var yearFirstDay = new Date(year, 0, 1).getDay();
+    //計算是第幾周
+    days += yearFirstDay;
+    var week = Math.ceil(days / 7);	//向上取整數
+   return week;
+},
+ isLeapYear:function(year) {
+    return (year % 400 == 0) || (year % 4 == 0 && year % 100 != 0);
+},
+ getMonthDays:function(year, month) {
+    return [31, (calendar.isLeapYear(year) ? 29 : 28), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month];
+},
+getDateturn:function(targetD){
+	oDate1=new Date("2022/8/7")   //  輪班早班起算日期
+	oDate2=targetD
+   Diffdays=parseInt(Math.abs(oDate1 - oDate2) / 1000 / 60 / 60 / 24); 
+
+	if(oDate1 < oDate2)
+       return Math.floor(Diffdays/7)%3
+     else
+        return (Math.ceil(Diffdays/7)%3  == 0) ? 0 : (Math.ceil(Diffdays/7)%3  == 1) ? 2 : 1
+ },
+getYearGanZhi:function(SY){
+var Gan=new Array("甲","乙","丙","丁","戊","己","庚","辛","壬","癸");
+var Zhi=new Array("子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥");
+return(Gan[(SY-4)%10]+Zhi[(SY-4)%12]);
+},
+getFirstDay:function(year,month){ //獲取每個月第一天星期幾
+var firstDay = new Date(year,month,1);
+return firstDay.getDay(); //getDay()方法來獲取
+},
+getMonthLen:function(year,month){ //獲取當月總共有多少天
+var nextMonth = new Date(year,month+1,0); //獲取下個月的第一天
+//nextMonth.setHours(nextMonth.getHours() - 1); //由於獲取的天是0時,所以減去1小時則可以得出該月的天數
+return nextMonth.getDate(); //返回當天日期
+},
+createCalendar:function(form,date){ //創建日曆方法
+SY = date.getFullYear(); //獲得當時的年份,並賦值到calendar屬性year中,以便別的方法的調用
+SM= date.getMonth(); //跟上面獲取年份的目的一樣
+cld = new Xcalendar(SY,SM); 	
+document.getElementById('tittle').innerHTML = SY+calendar.getYearGanZhi(SY).fontcolor('red')+ '年 ' + (SM + 1) + '月'; //插入年份和月份
+calendar.clearCalendar(form); //清空TABLE
+var monthLen = calendar.getMonthLen(SY,SM); //獲取月份長度
+var firstDay = calendar.getFirstDay(SY,SM); //獲取月份首天為星期幾
+
+totalrest=0; restAdd=0;  //創建日曆時要歸零
+workday=monthLen
+// 輪班item
+//tkobj=[{item:'夜',color:'red'},{item:'中', color:'blue'},{item:'早',color:'green'}]
+d=1
+k=calendar.getDateturn(new Date(SY,SM,1))
+
+for(var i = 0; i <48 ; i++){ //迴圈寫入每天的值進入TABLE中
+if(d > monthLen)	break;
+
+if  (i>0 && i<firstDay+1)	calendar.dayTable[i].innerText =' '
+else if (i%8==0)
+{ Adjust_tkobj()   //調整輪班順序
+calendar.dayTable[i].innerHTML =tkobj[k] .item 
+calendar.dayTable[i].style.color=tkobj[k].color 
+
+k=(k+1)%3  
+}
+else  
+{
+	
+if(cld[d-1].isToday) calendar.dayTable[i].id = 'todayColor'; //今日顏色
+calendar.dayTable[i].style.color = cld[d-1].color; //國定假日顏色
+if(cld[d-1].lDay==1) //顯示農曆月
+     if(cld[d-1].isLeap) //閏月
+	calendar.dayTable[i].innerHTML =d +'<div class="lunar"><b>閏'+cld[d-1].lMonth+'月' + (leapDays(cld[d-1].lYear)==29?'小':'大')+'</b></div>';
+     else //非閏月
+	calendar.dayTable[i].innerHTML =d +'<div class="lunar"><b>'+cld[d-1].lMonth+'月' + (monthDays(cld[d-1].lYear,cld[d-1].lMonth)==29?'小':'大')+'</b></div>'
+ else //顯示農曆日
+	calendar.dayTable[i].innerHTML =d +'<div class="lunar">'+cDay(cld[d-1].lDay)+'</div>'
+ 
+         if(cld[d-1].lunarFestival.length>0) //農曆節日
+              s =cld[d-1].lunarFestival;
+         else { //國歷節日
+            if(cld[d-1].solarFestival.length>0)
+                 s=cld[d-1].solarFestival;
+            else { //廿四節氣
+               s=cld[d-1].solarTerms;
+               if(s.length>0) s = s.fontcolor('green');
+            }
+         }
+       
+ if(cld[d-1].solarTerms=='清明') s = '清明節'.fontcolor('red');
+//顯示節日
+ if(s.length>0) calendar.dayTable[i].innerHTML =d +'<div class="lunar">'+s+'</div>'
+
+  calendar.dayTable[i].value=d 
+  for ( var key in noteList) 
+	if( key== SY+("0"+(SM+1)).match(/\d{2}$/)+("0"+d).match(/\d{2}$/) )
+	{calendar.dayTable[i].className= borderclass[noteList[key].borderN];  
+	  calendar.dayTable[i].innerHTML=d+'<div class="lunar">'+noteList[key].note.fontcolor("blue");
+	if(noteList[key].borderN!="0") 
+	  totalrest++}
+  d++}
+	}
+	showRestData()
+	
+},
+clearCalendar:function(form){ //清空TABLE方法
+this.dayTable = form.getElementsByTagName('td');
+for(var i = 0;i < this.dayTable.length;i++){
+this.dayTable[i].innerHTML = ' ';
+this.dayTable[i].value = '';
+this.dayTable[i].id = '';
+this.dayTable[i].className = '';
+	}	
+},
+init:function(form){ //主方法
+this.dayTable = form.getElementsByTagName('td');
+this.createCalendar(form,new Date());
+
+gotoday.onclick = function(){ //當點擊今天按鈕時,重繪當月TABLE
+calendar.createCalendar(form,new Date());
+	}
+prev.onclick =function(){  
+	calendar.createCalendar(form,new Date(SY,SM-1,1));
+
+    }   
+
+next.onclick = function(){    
+	calendar.createCalendar(form,new Date(SY,SM+1,1));
+	
+  }
+            
+
+ }
+
+}	//end var calendar object
+
+
+window.onload=function() {
+// startConfetti(); 撒花特效
+
+	var calendars = document.getElementById('calendar');
+	calendar.init(calendars);
+        
+          //點擊年月抬頭顯示日期選單
+	const zh = {
+                daysMin: ['日', '一', '二', '三', '四', '五', '六'],
+                months: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'],
+                monthsShort:  ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"],
+                today: 'Today',
+                clear: 'Clear',
+               dateFormat: 'yyyy/MM/dd',
+                timeFormat: 'hh:mm aa',
+                firstDay: 0
+            }
+
+            const datepicker = new AirDatepicker('#myDatepicker',{
+				    locale: zh,
+				    view: 'months',
+				    minView: 'months',
+					isMobile: true,
+				    autoClose: true,
+					onSelect: function onSelect() {
+					date=new Date(datepicker.selectedDates)
+					var Y=date.getFullYear()
+					var M=date.getMonth()
+					calendar.createCalendar(calendars,new Date(Y,M,1));
+					$('#myDatepicker').hide();
+					}		   
+		    });
+		
+	//刪除 www.000webhostapp.com 廣告連結
+	divs = document.querySelectorAll('div'); 
+	for(k=0;k<divs.length;k++) {style = divs[k].currentStyle || window.getComputedStyle(divs[k], false);
+	if(style.zIndex==9999999) divs[k].remove()}
+
+$('#tittle').click(function(){ ($('#myDatepicker').css("display")=="none") ? $('#myDatepicker').show() : $('#myDatepicker').hide();  })
+}
+
+</script>
+
+</head>
+
+<body><center>
+<a id="prev" href="#"><i class="fa fa-chevron-left"></i></a>
+<a id="gotoday" href="#">今天</a>
+<a id="next" href="#"><i class="fa fa-chevron-right"></i></a>
+<br><br>
+<div id="view"><br/>
+<div id="tittle"></div>
+
+<table id="calendar" cellspacing="0">
+<tr id="days">
+<th>班</th>
+<th style="color:#f00">日</th>
+<th>一</th>
+<th>二</th>
+<th>三</th>
+<th>四</th>
+<th>五</th>
+<th style="color:#f00">六</th>
+</tr>
+<tr>
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td> </td>
+</tr></table>
+</div>
+<div id='myDatepicker'></div>
+</center>
+<div id="works"></div>
+<div id="Myrestday"></div>
+<button onclick=outportNote()>匯出</button>
+<button  onclick=Save($("#noteText").val())>存檔</button>
+<button  onclick=removeStorage()>刪除Storage</button>
+<input type="file" onchange="selectTextFile(this.files)" />
+<button onclick=importNote()>匯入</button><br>
+<textarea id="noteText" rows=25 cols=30></textarea>
+
+<dialog class="dialog">
+  <h2 >新增日期記事</h2>
+  <input type="text" id="mynote" size="10" value="休假"><br>
+  <select id="borderN"><option value=0>無框</option>
+  <option value=1 selected>紅框</option>
+  <option value=2>橘框</option></select ><p>
+    <button class="cancel">取消</button>
+    <button class="confirm">確認</button>
+    <button class="delete">刪除</button>
+</dialog>
+</body>
+<!-- Air datepicker JavaScript-->
+        <script src="https://cdn.jsdelivr.net/npm/air-datepicker@3.3.5/air-datepicker.min.js"></script>
+<script>
+const dialog = document.querySelector('.dialog');
+const cancelButton = document.querySelector('.cancel');
+const confirmButton = document.querySelector('.confirm');
+const deleteButton = document.querySelector('.delete');
+const dailoghead=document.querySelector('.dialog h2');
+
+$( document ).ready(function() { restAdd=0;
+	$("td").click(function() {
+		if ($(this).val()<1) return 
+		thedate=SY+("0"+(SM+1)).match(/\d{2}$/)+("0"+$(this).val()).match(/\d{2}$/)
+		dailoghead.innerHTML="日期記事<br>"+thedate
+		dialog.showModal();
+		tdi=$(this)		
+   });
+});     
+
+
+confirmButton.addEventListener('click', () => {
+			if(noteList[thedate]==undefined ) 	noteList[thedate]={}	
+			noteList[thedate].borderN=document.querySelector("#borderN").value
+			noteList[thedate].note=document.querySelector("#mynote").value
+			tdi.attr("class",borderclass[noteList[thedate].borderN])
+			tdi.children().html(noteList[thedate].note.fontcolor("blue"));			
+			if(noteList[thedate].borderN!="0") restAdd++;		
+			localStorage.setItem('noteList', JSON.stringify(noteList))
+	         showRestData(); dialog.close();	
+});     
+		
+deleteButton.addEventListener('click', () => {dialog.close();	 	
+			tdi.attr("class","");	tdi.children().html('')
+			delete noteList[thedate]
+			localStorage.setItem('noteList', JSON.stringify(noteList))		
+			restAdd--
+	        showRestData(); dialog.close();	 	
+});
+		
+cancelButton.addEventListener('click', () => {
+  dialog.close();
+});
+
+function objsorted(){
+	return Object.keys(noteList)
+  .sort((a,b) =>  a.split("-")[1] - b.split("-")[1]  )
+  .reduce((accumulator, key) => {
+    accumulator[key] = noteList[key];
+    return accumulator;
+  }, {});
+}
+
+function  importNote(){
+	if( $("#noteText").val()=="" )  return 
+	localStorage.setItem('noteList', $("#noteText").val() )
+	alert("匯入完成")
+}
+
+
+
+function  outportNote(){ 
+$("#noteText").val( JSON.stringify(noteList).replace(/,/g,",\n"))
+}
+
+function selectTextFile(files) {
+    if (!files.length) {
+        return false;
+    }
+    
+    let file    = files[0];
+    let reader = new FileReader();
+    reader.onload = function () {
+        document.getElementById('noteText').value = this.result;
+    };
+    
+    reader.readAsText(file);
+}
+
+function Save(txt){
+if( txt=="" ) return 
+var blob = new Blob([txt]);
+filename = `休假記錄_${new Date().toJSON().slice(0,10)}.txt` ;
+var a = document.createElement("a");
+a.href = window.URL.createObjectURL(blob);
+a.download = filename;
+a.click()
+alert ("存檔完成")
+}
+
+function removeStorage(){
+if (confirm("確定要刪除嗎？") == true)
+localStorage.removeItem('noteList');
+}
+</script>
+</html>
+
