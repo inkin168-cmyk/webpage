@@ -9,9 +9,13 @@
 <meta property="og:image" content="https://avatars.githubusercontent.com/u/237753591?s=96&v=4" />
 <link rel="icon" type="image/x-icon" href="https://avatars.githubusercontent.com/u/237753591?s=96&v=4">
 <title>永欽萬年曆</title>
- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/all.css" />
- <script src = "https://textdoc.co/home/download/9Cv0cdeWHyf6OQjL"></script><!--這是adjustDate.js -->
-<script src = "https://textdoc.co/home/download/QqzpocxLtenVJ6YN"></script><!--這是tkobj.js -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.2/animate.min.css">
+<script src="https://code.jquery.com/jquery-3.6.0.slim.min.js"></script>
+<!-- Air datepicker CSS -->
+        <link href="https://cdn.jsdelivr.net/npm/air-datepicker@3.3.5/air-datepicker.min.css" rel="stylesheet">
+<!-- Air datepicker JavaScript-->
+       <script src="https://cdn.jsdelivr.net/npm/air-datepicker@3.3.5/air-datepicker.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/all.css" />
 <style type="text/css">
 #contains{margin-top:20px; width: 98%; display: block;background:#ead40b;
 border: 5px solid  #ff47d1}
@@ -131,6 +135,10 @@ text-align:center;
 
 .lunar{font-size:10pt; }
 
+#myDatepicker{display: none; position: absolute;
+top: 30%; left: calc(50% - 300px / 2);
+width: 300px; 
+}
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.2/animate.min.css">
 <script type="text/javascript">
@@ -141,7 +149,6 @@ script1.src = 'https://cdn.jsdelivr.net/gh/inkin168-cmyk/webpage@refs/heads/main
 document.head.appendChild(script1);
 script2.src = 'https://cdn.jsdelivr.net/gh/inkin168-cmyk/webpage@refs/heads/main/tkobj.js?'+new Date();
 document.head.appendChild(script2);
-
 
 /*****************************************************************************
                                  日期數據
@@ -685,7 +692,34 @@ window.onload=function() {
 
 	var calendars = document.getElementById('calendar');
 	calendar.init(calendars);
-	
+	//點擊年月抬頭顯示日期選單
+	const zh = {
+                daysMin: ['日', '一', '二', '三', '四', '五', '六'],
+                months: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'],
+                monthsShort:  ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"],
+                today: 'Today',
+                clear: 'Clear',
+               dateFormat: 'yyyy/MM/dd',
+                timeFormat: 'hh:mm aa',
+                firstDay: 0
+            }
+
+            const datepicker = new AirDatepicker('#myDatepicker',{
+				    locale: zh,
+				    view: 'months',
+				    minView: 'months',
+					isMobile: true,
+				    autoClose: true,
+					onSelect: function onSelect() {
+					date=new Date(datepicker.selectedDates)
+					var Y=date.getFullYear()
+					var M=date.getMonth()
+					calendar.createCalendar(calendars,new Date(Y,M,1));
+					$('#myDatepicker').hide();
+					}		   
+		    });
+		
+		$('#tittle').click(function(){ ($('#myDatepicker').css("display")=="none") ? $('#myDatepicker').show() : $('#myDatepicker').hide();  })
 }
 
 
@@ -775,6 +809,7 @@ window.onload=function() {
 </tr></table>
 </div>
 <div id="works"></div>
+<div id='myDatepicker'></div>
 </body>
 </html>
 
